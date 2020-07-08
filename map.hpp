@@ -8,8 +8,8 @@ namespace QoUtils
 #ifdef _GLIBCXX_VECTOR
 
 template<class T, class F> constexpr
-auto map(F && f, const std::vector<T>& v)
-{
+auto map(F && f, const std::vector<T>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
+{    
     std::vector<decltype(f(std::declval<T>()))> result(v.size());
     const std::size_t size = v.size();
 
@@ -22,7 +22,7 @@ auto map(F && f, const std::vector<T>& v)
 }
 
 template <class T, class F> constexpr
-auto& map(F && f, std::vector<T>& v)
+auto& map(F && f, std::vector<T>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 {
     constexpr bool void_return = std::is_void_v<decltype(f(std::declval<T>()))>;
 
@@ -40,7 +40,7 @@ auto& map(F && f, std::vector<T>& v)
 }
 
 template <class T, class F> constexpr
-auto map(F && f, std::vector<T>&& v)
+auto map(F && f, std::vector<T>&& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 {
     std::vector<decltype(f(std::declval<T>()))> result(v.size());
     const std::size_t size = v.size();

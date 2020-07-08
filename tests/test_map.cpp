@@ -11,6 +11,11 @@ const auto mul5   = [](auto a){ return a * 5; };
 
 const auto null   = [](auto && a) { a = 0;};
 
+const auto throwIf42         = [](auto && a) { {if (a==42)   throw 42;} return a; };
+const auto throwIf42ElseNull = [](auto && a) { {if (a==42)   throw 42;} return a = 0; };
+const auto throwIf42ElseMove = [](auto && a) { {if (a=="42") throw 42;} auto b = std::move(a);
+                                                                        return b; };
+
 class test_map : public QObject
 {
     Q_OBJECT
@@ -81,6 +86,35 @@ private slots:
 
             QCOMPARE(map(reverse, std::move(v)), r);
             QCOMPARE(v, (std::vector<std::string>{"", "", ""}));
+        }
+
+        {
+            const std::vector              v1 = {  1, 42, -5, 4};
+                  std::vector              v2 = {  1,  2, 42, 3};
+                  std::vector<std::string> v3 = {"1", "2", "3", "42"};
+
+            std::vector<int> r1, r2;
+            std::vector<std::string> r3;
+
+            for (int i = 1; i <= 3; ++i)
+                try {
+                    switch(i) {
+                    case 1: r1 = map(throwIf42        ,           v1);  QCOMPARE(1, 2);   break;
+                    case 2: r2 = map(throwIf42ElseNull,           v2);  QCOMPARE(1, 2);   break;
+                    case 3: r3 = map(throwIf42ElseMove, std::move(v3)); QCOMPARE(1, 2);   break;
+                    }
+                }
+                catch (int e)
+                {
+                    QCOMPARE(e, 42);
+                }
+            QCOMPARE(r1, (std::vector<int>{}));
+            QCOMPARE(r2, (std::vector<int>{}));
+            QCOMPARE(r3, (std::vector<std::string>{}));
+
+            QCOMPARE(v1, (std::vector<int>        {1, 42, -5, 4}));
+            QCOMPARE(v2, (std::vector<int>        {0,  0, 42, 3}));
+            QCOMPARE(v3, (std::vector<std::string>{"", "", "", "42"}));
         }
     }
 
