@@ -1,11 +1,14 @@
 #include <QtTest>
 
 #include <vector>
+#include <string>
+
 #include "map.hpp"
 
 const auto plus1  = [](auto a){ return a + 1; };
 const auto minus3 = [](auto a){ return a - 3; };
 const auto mul5   = [](auto a){ return a * 5; };
+
 const auto null   = [](auto && a) { a = 0;};
 
 class test_map : public QObject
@@ -63,6 +66,21 @@ private slots:
                 QCOMPARE(v, (std::vector<int> {0, 0, 0, 0, 0, 0}));
                 QCOMPARE(&v, &temp);
             }
+        }
+
+        {
+            std::vector<std::string> v = {"Hello", "World", "!"};
+
+            constexpr auto reverse = [](std::string && a)
+            {
+                std::string result {std::move(a)};
+                return std::string { result.rbegin(), result.rend() };
+            };
+
+            const std::vector r { reverse("Hello"), reverse("World"), reverse("!")};
+
+            QCOMPARE(map(reverse, std::move(v)), r);
+            QCOMPARE(v, (std::vector<std::string>{"", "", ""}));
         }
     }
 
