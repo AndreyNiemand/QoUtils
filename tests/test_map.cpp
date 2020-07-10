@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(tuple_rvalue)
     BOOST_CHECK(std::get<1>(t1) == std::get<1>(t2));
 }
 
-BOOST_AUTO_TEST_CASE(tuple_return_lvalue)
+BOOST_AUTO_TEST_CASE(tuple_returning_lvalue)
 {
     using namespace QoUtils;
 
@@ -169,5 +169,20 @@ BOOST_AUTO_TEST_CASE(tuple_return_lvalue)
     BOOST_CHECK(t1 == (std::tuple{2, 2, 20, -4}));
     BOOST_CHECK(t2 == (std::tuple{2, 2, 20, -4}));
 
+}
+
+BOOST_AUTO_TEST_CASE(tuple_returning_void)
+{
+    using namespace QoUtils;
+
+    std::tuple t = {1,2,"3","4"};
+    auto f = [](auto a)
+    {
+        if constexpr (std::is_integral_v<decltype(a)>)
+            return a;
+    };
+    auto d = map(f, t);
+
+    BOOST_CHECK(map(f, t) == (std::tuple{1,2}));
 }
 

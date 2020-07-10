@@ -9,13 +9,15 @@ Implementations:
     2) con<T> = map(_,       &);
     3) con<T> = map(_,      &&);
 
-    4) con<const T&> map(f, _); const T& f(D);
-    5) con<      T&> map(f, _);       T& f(D);
-    6) con<     T&&> map(f, _);      T&& f(D);
+    4) con<const T&> map(f, _); const T& f(_);
+    5) con<      T&> map(f, _);       T& f(_);
+    6) con<     T&&> map(f, _);      T&& f(_);
+
+   *7) void map(f, _); void f(_);
 
 Supported containers:
     vector,
-    tuple;
+    tuple; (7) if f(_) -> void, there will be no item in the place of result tuple;
 
 Examples:
     1)
@@ -33,6 +35,11 @@ Examples:
         r = map([](auto b){ return UpperCase(b); }, std::move(a));
         r == { "WE", "ARE", "STRING" };
         a == { "", "", "" };
+
+   *7)
+        tuple = {1,2,"3","4"};
+        f = [](a){ if constexpr (is_integral<decltype(a)>) return a; };
+        map(f, tuple) == {1,2};
 */
 
 namespace QoUtils
@@ -98,11 +105,19 @@ namespace detail::tuple
 template<std::size_t ...I, class F, class T> constexpr
 auto map_impl(F && f, T && t, std::integer_sequence<std::size_t, I...>)
 {
-    return std::tuple<decltype(f(std::get<I>(std::forward<T>(t))))...>
+    const auto d = [&f](auto && a)
     {
-        f(std::get<I>(std::forward<T>(t)))
-                ...
+        if constexpr (std::is_void_v<decltype(f(a))>)
+        {
+            f(a);
+            return std::tuple<>();
+        }
+        else {
+            return std::tuple<decltype(f(a))>(f(a));
+        }
     };
+
+    return std::tuple_cat( d(std::get<I>(std::forward<T>(t))) ... );
 }
 
 }
