@@ -1,5 +1,5 @@
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE map
+#define BOOST_TEST_MODULE test_map
 #include <boost/test/unit_test.hpp>
 
 #include <vector>
@@ -116,10 +116,58 @@ BOOST_AUTO_TEST_CASE(tuple_clvalue)
     using std::operator ""s;
 
     const std::tuple t {false, 3, "Hello"};
-    const std::tuple r {true, 4, "ello"s};
+    const std::tuple r { true, 4, "ello"s};
 
     BOOST_CHECK(map([](const auto& a){ return a + 1; }, t) == r);
 }
 
+BOOST_AUTO_TEST_CASE(tuple_lvalue)
+{
+    using namespace QoUtils;
+    using std::operator ""s;
 
+    std::tuple t = {1,2,3};
+
+    BOOST_CHECK(map([](auto a){return a +  1;}, t) == (std::tuple{ 2, 3, 4}));
+    BOOST_CHECK(t == (std::tuple{ 1,2,3 }));
+    BOOST_CHECK(map([](auto a){return a * -4;}, t) == (std::tuple{-4,-8,-12}));
+    BOOST_CHECK(t == (std::tuple{ 1,2,3 }));
+
+    BOOST_CHECK(map([](auto& a){ a += 2; return a + 1;}, t) == (std::tuple{ 4, 5, 6}));
+    BOOST_CHECK(t == (std::tuple{ 3,4,5 }));
+    BOOST_CHECK(map([](auto& a){ a =  0; return a - 1;}, t) == (std::tuple{-1,-1,-1}));
+    BOOST_CHECK(t == (std::tuple{ 0,0,0 }));
+}
+
+BOOST_AUTO_TEST_CASE(tuple_rvalue)
+{
+    using namespace QoUtils;
+    using std::operator ""s;
+
+    const char* World = "World";
+    std::tuple t1 { "Hello"s, World, "!"s };
+    std::tuple t2 = map([](auto && a){ return std::move(a); }, t1);
+
+    BOOST_CHECK(t1 == (std::tuple{""s, World, ""s}));
+    BOOST_CHECK(t2 == (std::tuple{"Hello"s, World, "!"s}));
+    BOOST_CHECK(std::get<1>(t1) == std::get<1>(t2));
+}
+
+BOOST_AUTO_TEST_CASE(tuple_return_lvalue)
+{
+    using namespace QoUtils;
+
+    std::tuple<int, const int, int, int>
+            t1 {1,2,3,4};
+    std::tuple
+            t2 = map([](auto && a) -> auto && { return a;}, t1);
+
+    std::get<0>(t2) = 2;
+    std::get<2>(t2) = 20;
+    std::get<3>(t2) = -4;
+
+    BOOST_CHECK(t1 == (std::tuple{2, 2, 20, -4}));
+    BOOST_CHECK(t2 == (std::tuple{2, 2, 20, -4}));
+
+}
 

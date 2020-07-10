@@ -9,9 +9,9 @@ Implementations:
     2) con<T> = map(_,       &);
     3) con<T> = map(_,      &&);
 
-    4) map(f, _) = delete; const T& f(D);
-    5) map(f, _) = delete;       T& f(D);
-    6) map(f, _) = delete;      T&& f(D);
+    4) con<const T&> map(f, _); const T& f(D);
+    5) con<      T&> map(f, _);       T& f(D);
+    6) con<     T&&> map(f, _);      T&& f(D);
 
 Supported containers:
     vector,
@@ -92,56 +92,40 @@ auto map(F && f, std::vector<T>&& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 //#include <tuple>
 #ifdef _GLIBCXX_TUPLE
 
-namespace detail { namespace tuple {
-
-template<std::size_t I, class R, class T, class F> constexpr
-void map(R& result, T && t, F && f)
+namespace detail::tuple
 {
-    if constexpr(std::is_void_v<std::invoke_result_t<F, decltype(std::get<I>(std::forward<T>(t)))>>)
+
+template<std::size_t ...I, class F, class T> constexpr
+auto map_impl(F && f, T && t, std::integer_sequence<std::size_t, I...>)
+{
+    return std::tuple<decltype(f(std::get<I>(std::forward<T>(t))))...>
     {
-        f(std::get<I>(std::forward<T>(t)));
-    }
-    else
-    {
-        std::get<I>(result) = f(std::get<I>(std::forward<T>(t)));
-    }
-    if constexpr (I > 0)
-        detail::tuple::map<I-1> (result, t, f);
+        f(std::get<I>(std::forward<T>(t)))
+                ...
+    };
 }
 
-}}
+}
 
 template<class F, class ...A> constexpr
 auto map(F && f, const std::tuple<A...>& t)
 {
-    static_assert (!(std::is_reference_v<std::invoke_result_t<F, A>> && ...),
-                   "Predicate of map should return no reference.");
-
-    std::tuple<std::invoke_result_t<F, A>...> result;
-    detail::tuple::map<sizeof...(A)-1> (result, t, f);
-    return result;
+    return detail::tuple::map_impl(std::forward<F>(f), t,
+                                   std::make_index_sequence<sizeof... (A)>{});
 }
 
 template<class F, class ...A> constexpr
-auto map(F f, std::tuple<A...>& t)
+auto map(F && f, std::tuple<A...>& t)
 {
-    static_assert (!(std::is_reference_v<std::invoke_result_t<F, A>> && ...),
-                   "Predicate of map should return no reference.");
-
-    std::tuple<std::invoke_result_t<F, A>...> result;
-    detail::tuple::map<sizeof...(A)-1> (result, t, f);
-    return result;
+    return detail::tuple::map_impl(std::forward<F>(f), t,
+                                   std::make_index_sequence<sizeof... (A)>{});
 }
 
 template<class F, class ...A> constexpr
 auto map(F && f, std::tuple<A...>&& t)
 {
-    static_assert (!(std::is_reference_v<std::invoke_result_t<F, A>> && ...),
-                   "Predicate of map should return no reference.");
-
-    std::tuple<std::invoke_result_t<F, A>...> result;
-    detail::tuple::map<sizeof...(A)-1> (result, std::move(t), f);
-    return result;
+    return detail::tuple::map_impl(std::forward<F>(f), std::move(t),
+                                   std::make_index_sequence<sizeof... (A)>{});
 }
 
 #endif
