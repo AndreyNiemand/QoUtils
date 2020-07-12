@@ -1,25 +1,20 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
-PROJECT(QoUtils LANGUAGES CXX)
+PROJECT(test_QoUtils LANGUAGES CXX)
 
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
-SET(CMAKE_AUTOMOC ON)
-SET(CMAKE_INCLUDE_CURRENT_DIR ON)
-SET(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+file(GLOB QoUtil_FILES "../*.hpp")
+file(GLOB TESTS_FILES "*.cpp" module.hpp)
 
-include_directories("../")
-include_directories(${Boost_INCLUDE_DIR})
+add_executable(${PROJECT_NAME} ${TESTS_FILES} ${QoUtil_FILES})
 
-SET(HEADERS "../map.hpp"
-            "../container-viewer.hpp"
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
     )
 
-SET(SOURCES
-        test_map.cpp
-        test_container-viewer.cpp
-    )
-
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PRIVATE "../" ${Boost_INCLUDE_DIR})
+

@@ -1,12 +1,13 @@
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_map
-#include <boost/test/unit_test.hpp>
+
+#include "module.hpp"
 
 #include <vector>
 #include <string>
 #include <tuple>
 
 #include "map.hpp"
+
+BOOST_AUTO_TEST_SUITE(test_map);
 
 const auto plus1  = [](auto a){ return a + 1; };
 const auto minus3 = [](auto a){ return a - 3; };
@@ -27,6 +28,7 @@ BOOST_AUTO_TEST_CASE(vector_clvalue)
     BOOST_CHECK(map(minus3, v) == (std::vector<int> {1-3, 20-3, 36-3, -4-3, 5-3, 0-3}));
     BOOST_CHECK(map(mul5  , v) == (std::vector<int> {1*5, 20*5, 36*5, -4*5, 5*5, 0*5}));
 }
+
 BOOST_AUTO_TEST_CASE(vector_lvalue)
 {
     using namespace QoUtils;
@@ -186,3 +188,4 @@ BOOST_AUTO_TEST_CASE(tuple_returning_void)
     BOOST_CHECK(map(f, t) == (std::tuple{1,2}));
 }
 
+BOOST_AUTO_TEST_SUITE_END();

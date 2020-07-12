@@ -1,13 +1,26 @@
-#ifndef QoUtils_CONTAINERVIEWER_HPP
-#define QoUtils_CONTAINERVIEWER_HPP
+#ifndef QoUtils_CONTAINER_VIEWER_HPP
+#define QoUtils_CONTAINER_VIEWER_HPP
 
 #include <tuple>
 #include "map.hpp"
 
+#include <optional>
+
 namespace QoUtils
 {
 
-template<class ...A>
+template<template<class...> class, template<class...> class>
+struct is_similar : std::false_type{};
+
+template<template<class...> class T>
+struct is_similar<T, T> : std::true_type{};
+
+template<template<class...> class T, template<class...> class D>
+constexpr bool is_similar_v = is_similar<T, D>::value;
+
+template<class> struct value;
+
+template<template<class> class C = value, class ...A>
 class ContainerViewer
 {
     std::tuple<A&...> m_containers;
@@ -17,22 +30,63 @@ public:
     {    }
 
 public:
-    struct iterator : std::tuple<typename A::iterator ...>
+    struct iterator : std::tuple<typename std::remove_reference_t<A>::iterator ...>
     {
-        iterator& operator ++() noexcept
+        constexpr iterator& operator ++() noexcept
         {
             auto& lvalue = *this;
             QoUtils::map([](auto && a){ ++a; }, lvalue);
             return *this;
         }
-
-        auto operator*() const noexcept
+        constexpr iterator& operator ++(int) noexcept
         {
-            return QoUtils::map([](auto& a) -> std::tuple<typename A::value_type& ...>
-            {
-                return *a;
-            }, *this);
+            auto it = *this;
+            operator++();
+            return it;
         }
+
+        constexpr iterator& operator --() noexcept
+        {
+            auto& lvalue = *this;
+            QoUtils::map([](auto && a){ --a; }, lvalue);
+            return *this;
+        }
+        constexpr iterator& operator --(int) noexcept
+        {
+            auto it = *this;
+            operator--();
+            return it;
+        }
+
+        constexpr auto operator*() const noexcept
+        {
+            if constexpr (is_similar_v<C, value>)
+                return QoUtils::map([](auto && a) { return *a; }, *this);
+            else
+                return QoUtils::map([](auto && a) { return C{*a}; }, *this);
+        }
+
+//        constexpr bool operator ==(const iterator& it) noexcept
+//        {
+//            if constexpr (is_similar_v<C, value>)
+//            {
+//                bool end = false;
+//                for (auto [a, b] : covi(*this, it))
+//                {
+//                    if(a == b)
+//                    {
+//                        end = true;
+//                        break;
+//                    }
+//                }
+
+//                return end;
+//            }
+//        }
+//        constexpr bool operator !=(const iterator& it) noexcept
+//        {
+//            return !operator==(it);
+//        }
     };
 
     constexpr auto begin() const noexcept
@@ -45,6 +99,12 @@ public:
     }
 };
 
+template<template<class> class C = value, class ...A>
+auto covi(A && ...a)
+{
+    return ContainerViewer<C, A...>(a ...);
 }
 
-#endif // QoUtils_CONTAINERVIEWER_HPP
+}
+
+#endif // QoUtils_CONTAINER_VIEWER_HPP
