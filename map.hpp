@@ -42,11 +42,12 @@ Examples:
         map(f, tuple) == {1,2};
 */
 
+#include <def-guard.hpp>
+
 namespace QoUtils
 {
 
-//#include <vector>
-#ifdef _GLIBCXX_VECTOR
+#if QoUtils_VECTOR
 
 template<class T, class F> constexpr
 auto map(F && f, const std::vector<T>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
@@ -96,8 +97,7 @@ auto map(F && f, std::vector<T>&& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 
 #endif
 
-//#include <tuple>
-#ifdef _GLIBCXX_TUPLE
+#if QoUtils_TUPLE
 
 namespace detail::tuple
 {

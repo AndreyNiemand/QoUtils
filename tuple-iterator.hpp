@@ -1,11 +1,48 @@
 #ifndef QoUtils_TUPLE_ITERATOR_HPP
 #define QoUtils_TUPLE_ITERATOR_HPP
 
+/*
+    TupleIterator - class which allows to iterate through any tuple's elements and change them.
+    // TupleConstIterator - same functions but no able to change the items;
+
+    Observers:
+        Iterator operator[];
+
+        std::variant<T1, T2, ...> operator*();
+        // operator T&() throw(bad_cast);
+        operator T*();
+        // operator std::optional<T>();
+
+        [T&, bool]        get<T>(it);
+        std::optional<T&> get<std::optional<T>>(it);
+        T                 get_common_of<T1, T2, ...>(it);
+
+        // [T&&, bool]     move<T>(it);
+
+    Modifiers:
+        operators ++, --;
+
+    Comparers:
+        operators ==, !=, <=>;
+*/
+
 #include <tuple>
-#include <variant>
+
+#include "def-guard.hpp"
 
 namespace QoUtils
 {
+
+#if QoUtils_OPTIONAL
+template<class T>
+struct is_optional : std::false_type { };
+
+template <class T>
+struct is_optional<std::optional<T>> : std::true_type { };
+
+template<class T>
+constexpr bool is_optional_v = is_optional<T>::value;
+#endif
 
 template<std::size_t I, class X, class ...XS>
 struct get_type_by
@@ -27,7 +64,7 @@ template<class ...T>
 struct TupleIterator
 {
     using iterator_category = std::random_access_iterator_tag;
-    using value_type = std::variant<T...>;
+
     using difference_type = std::size_t;
 
     constexpr auto && operator++()    noexcept { ++m_i; return *this; }
@@ -41,38 +78,25 @@ struct TupleIterator
         return TupleIterator<T...>{r_t, m_i + i}.operator*();
     }
 
-//    constexpr std::variant<std::reference_wrapper<T>...> operator*() const
-//    {
-//        return std::get<0>(r_t);
+#if QoUtils_VARIANT
+    template<std::size_t I = 0> constexpr
+    std::variant<T...> operator*() const noexcept
+    {
+        if constexpr (I + 1 < sizeof...(T))
+            if (m_i != I)
+                return this->template operator*<I+1>();
 
-////        throw std::out_of_range{
-////               "The tuple contains no item by index: "s + std::to_string(m_i)
-////                           + "; (QoUtils_MAX_COUNT_TUPLE_ITEMS = "
-////                + std::to_string(QoUtils_MAX_COUNT_TUPLE_ITEMS) + ")"};
-
-//    }
+        return std::get<I>(r_t);
+    }
+#endif
 
     constexpr bool operator ==(const TupleIterator<T...>& t) const noexcept { return (m_i == t.m_i) && (&r_t == &t.r_t); }
     constexpr bool operator !=(const TupleIterator<T...>& t) const noexcept { return !operator==(t); }
 
-//    template<class R, class ...RS> constexpr
-//    bool get(R *result, RS* ...) const noexcept
-//    {
-//        if constexpr (sizeof... (RS) != 0)
-//        {
-//            if (result = get_impl<R, 0>())
-//                return result;
-//            else
-//                return get<RS...>();
-//        }
-
-//        return false;
-//    }
-
-    template<class R>
+    template<class R> constexpr
     operator R*() const noexcept
     {
-        return get_impl<R, 0>();
+        return get_impl<R>();
     }
 
 private:
@@ -87,8 +111,7 @@ private:
 
             return get_impl<R, I+1>();
         }
-
-        return nullptr;
+        else return nullptr;
     }
 
     TupleIterator(std::tuple<T...>& a, std::size_t i): r_t{a}, m_i{i} {}
@@ -98,6 +121,8 @@ private:
 
     template<class ...B> friend constexpr auto begin(std::tuple<B...>&) noexcept;
     template<class ...B> friend constexpr auto end  (std::tuple<B...>&) noexcept;
+    template<class R, class ...A> friend constexpr auto get(TupleIterator<A...> it) noexcept;
+    template<class R, class ...RS, class ...A> constexpr friend std::pair<std::common_type_t<R, RS...>, bool> get_common_of(TupleIterator<A...> it);
 };
 
 template<class ...A> constexpr
@@ -113,6 +138,44 @@ auto end(std::tuple<A...>& t) noexcept
 
     return TupleIterator<A...>{t, size};
 }
+
+template<class R, class ...RS, class ...A> constexpr
+std::pair<std::common_type_t<R, RS...>, bool> get_common_of(const TupleIterator<A...> it)
+{
+    if (auto v = it.template get_impl<R>())
+    {
+        return { *v, true };
+    }
+
+    if constexpr (sizeof... (RS) != 0)
+    {
+        return get_common_of<RS...>(it);
+    }
+
+    return {std::common_type_t<R, RS...>{ }, false};
+}
+
+template<class R, class ...A> constexpr
+auto get(const TupleIterator<A...> it) noexcept
+{
+#if QoUtils_OPTIONAL
+    if constexpr (is_optional_v<R>)
+    {
+        using value_type = typename R::value_type;
+        auto v = it.template get_impl<value_type>();
+        return v ? std::optional<std::reference_wrapper<value_type> >
+            { *v } : std::nullopt;
+    }
+    else
+#endif
+    {
+        bool stub = false;
+        auto v = it.template get_impl<R>();
+        return v ? std::pair<R&, bool> {                         *v,  true }
+                 : std::pair<R&, bool> { reinterpret_cast<R&>(stub), false };
+    }
+}
+
 
 }
 
