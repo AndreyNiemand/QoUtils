@@ -4,7 +4,7 @@
 #include <array>
 #include <optional>
 
-#include "container-viewer.hpp"
+#include "container_viewer.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_container_viewer);
 

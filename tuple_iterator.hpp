@@ -28,37 +28,11 @@
 
 #include <tuple>
 
-#include "def-guard.hpp"
+#include "def_guard.hpp"
+#include "type_traits.hpp"
 
 namespace QoUtils
 {
-
-#if QoUtils_OPTIONAL
-template<class T>
-struct is_optional : std::false_type { };
-
-template <class T>
-struct is_optional<std::optional<T>> : std::true_type { };
-
-template<class T>
-constexpr bool is_optional_v = is_optional<T>::value;
-#endif
-
-template<std::size_t I, class X, class ...XS>
-struct get_type_by
-{
-    using type = typename get_type_by<I-1, XS...>::type;
-};
-
-template<class X, class ...XS>
-struct get_type_by<0, X, XS...>
-{
-    using type = X;
-};
-
-
-template<std::size_t I, class ...XS>
-using get_type_by_t = typename get_type_by<I, XS...>::type;
 
 template<class ...T>
 struct TupleIterator
@@ -121,7 +95,7 @@ private:
 
     template<class ...B> friend constexpr auto begin(std::tuple<B...>&) noexcept;
     template<class ...B> friend constexpr auto end  (std::tuple<B...>&) noexcept;
-    template<class R, class ...A> friend constexpr auto get(TupleIterator<A...> it) noexcept;
+    template<class R, class ...A>              constexpr friend auto get(TupleIterator<A...> it) noexcept;
     template<class R, class ...RS, class ...A> constexpr friend std::pair<std::common_type_t<R, RS...>, bool> get_common_of(TupleIterator<A...> it);
 };
 

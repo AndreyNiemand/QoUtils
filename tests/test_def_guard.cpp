@@ -15,7 +15,7 @@
 #error QoUtils_TUPLE must be defined after 'def-guard.hpp' included!
 #endif
 
-#include "def-guard.hpp"
+#include "def_guard.hpp"
 
 #ifndef QoUtils_OPTIONAL
 #error QoUtils_OPTIONAL has not been defined!

@@ -3,7 +3,7 @@
 
 #include <optional>
 #include <variant>
-#include "tuple-iterator.hpp"
+#include "tuple_iterator.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_tuple_iterator);
 

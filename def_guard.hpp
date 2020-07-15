@@ -3,10 +3,14 @@
 
     Example:
         #include <tuple>           // or #define QoUtils_TUPLE 1
+        #include <fold.hpp>
         #define QoUtils_OPTIONAL 1 // or #include <optional>
-
         #include <map.hpp>
-        // all it added the functions: map(std::tuple) and map(std::optional).
+
+        // all which have been added the functions:
+            map(std::tuple),
+            map(std::optional),
+            fold(std::tuple);
 */
 
 #ifndef QoUtils_DEF_GUARD_HPP

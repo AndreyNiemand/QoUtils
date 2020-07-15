@@ -5,18 +5,10 @@
 #include "map.hpp"
 
 #include <optional>
+#include "type_traits.hpp"
 
 namespace QoUtils
 {
-
-template<template<class...> class, template<class...> class>
-struct is_similar : std::false_type{};
-
-template<template<class...> class T>
-struct is_similar<T, T> : std::true_type{};
-
-template<template<class...> class T, template<class...> class D>
-constexpr bool is_similar_v = is_similar<T, D>::value;
 
 template<class> struct value;
 
