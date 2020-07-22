@@ -2,8 +2,9 @@
 #include "module.hpp"
 
 #include <optional>
-#include <variant>
+
 #include "tuple_iterator.hpp"
+#include "container_viewer.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_tuple_iterator);
 
@@ -111,8 +112,34 @@ BOOST_AUTO_TEST_CASE(test_operator_deref)
     auto a = *it; ++it;
     auto b = *it;
 
-    BOOST_CHECK_EQUAL         (std::get<const int>(a), 1);
-    BOOST_CHECK_CLOSE_FRACTION(std::get<   double>(b), 3, 0.001);
+    BOOST_CHECK_EQUAL         (get<const int>(a).first, 1);
+    BOOST_CHECK_CLOSE_FRACTION(get<   double>(b).first, 3, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(test_foreach)
+{
+    using namespace QoUtils;
+    std::tuple t = {1, 3, 2.3, 0.03F, true};
+
+    for(auto v : covi(t))
+    {
+        if (auto [item, success] = get<bool>(v); success)
+        {
+            BOOST_CHECK_EQUAL(item, true);
+        }
+        if (auto [item, success] = get<double>(v); success)
+        {
+            BOOST_CHECK_CLOSE_FRACTION(item, 2.3, 0.001);
+        }
+        if (auto [item, success] = get<float>(v); success)
+        {
+            BOOST_CHECK_CLOSE_FRACTION(item, 0.03, 0.001);
+        }
+        if (auto [item, success] = get<int>(v); success)
+        {
+            BOOST_CHECK(item == 1 || item == 3);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END();

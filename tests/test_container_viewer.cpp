@@ -8,6 +8,21 @@
 
 BOOST_AUTO_TEST_SUITE(test_container_viewer);
 
+BOOST_AUTO_TEST_CASE(one_item)
+{
+    using namespace QoUtils;
+
+    std::array<int, 4> a1 {1, 2, 3, 4};
+    int sum = 0;
+
+    for (auto item : covi(a1))
+    {
+        sum += item;
+    }
+
+    BOOST_CHECK_EQUAL(sum, 1+2+3+4);
+}
+
 BOOST_AUTO_TEST_CASE(iterator)
 {
     using namespace QoUtils;

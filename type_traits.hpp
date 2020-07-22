@@ -16,6 +16,12 @@ template<class T> struct is_vector<std::vector<T>> : std::true_type  { };
 template<class T> constexpr bool is_vector_v = is_vector<T>::value;
 #endif
 
+#if QoUtils_TUPLE
+template<class ...T> struct is_tuple                   : std::false_type { };
+template<class ...T> struct is_tuple<std::tuple<T...>> : std::true_type  { };
+template<class ...T> constexpr bool is_tuple_v = is_tuple<T...>::value;
+#endif
+
 
 template<std::size_t I, class X, class ...XS>
 struct get_type_by { using type = typename get_type_by<I-1, XS...>::type; };

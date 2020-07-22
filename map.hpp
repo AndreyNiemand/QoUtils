@@ -1,6 +1,3 @@
-#ifndef QoUtils_MAP_HPP
-#define QoUtils_MAP_HPP
-
 /*
     map - a function changing a container with one argrument predicate;
 
@@ -41,6 +38,9 @@ Examples:
         f = [](a){ if constexpr (is_integral<decltype(a)>) return a; };
         map(f, tuple) == {1,2};
 */
+
+#ifndef QoUtils_MAP_HPP
+#define QoUtils_MAP_HPP
 
 #include <def_guard.hpp>
 

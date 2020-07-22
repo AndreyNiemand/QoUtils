@@ -1,6 +1,3 @@
-#ifndef QoUtils_TUPLE_ITERATOR_HPP
-#define QoUtils_TUPLE_ITERATOR_HPP
-
 /*
     TupleIterator - class which allows to iterate through any tuple's elements and change them.
     // TupleConstIterator - same functions but no able to change the items;
@@ -8,7 +5,7 @@
     Observers:
         Iterator operator[];
 
-        std::variant<T1, T2, ...> operator*();
+        TupleIterator operator*(); // stub for 'foreach' cycles.
         // operator T&() throw(bad_cast);
         operator T*();
         // operator std::optional<T>();
@@ -25,6 +22,9 @@
     Comparers:
         operators ==, !=, <=>;
 */
+
+#ifndef QoUtils_TUPLE_ITERATOR_HPP
+#define QoUtils_TUPLE_ITERATOR_HPP
 
 #include <tuple>
 
@@ -52,17 +52,23 @@ struct TupleIterator
         return TupleIterator<T...>{r_t, m_i + i}.operator*();
     }
 
-#if QoUtils_VARIANT
-    template<std::size_t I = 0> constexpr
-    std::variant<T...> operator*() const noexcept
-    {
-        if constexpr (I + 1 < sizeof...(T))
-            if (m_i != I)
-                return this->template operator*<I+1>();
+//#if QoUtils_VARIANT
+//    template<std::size_t I = 0> constexpr
+//    std::variant<T...> operator*() const noexcept
+//    {
+//        if constexpr (I + 1 < sizeof...(T))
+//            if (m_i != I)
+//                return this->template operator*<I+1>();
 
-        return std::get<I>(r_t);
+//        return std::get<I>(r_t);
+//    }
+//#endif
+
+    constexpr
+    auto operator *() const
+    {
+        return *this;
     }
-#endif
 
     constexpr bool operator ==(const TupleIterator<T...>& t) const noexcept { return (m_i == t.m_i) && (&r_t == &t.r_t); }
     constexpr bool operator !=(const TupleIterator<T...>& t) const noexcept { return !operator==(t); }
