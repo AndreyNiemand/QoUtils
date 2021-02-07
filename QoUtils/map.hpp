@@ -42,15 +42,13 @@ Examples:
 #ifndef QoUtils_MAP_HPP
 #define QoUtils_MAP_HPP
 
-#include <def_guard.hpp>
+#include "STL_forward_declaration.hpp"
 
 namespace QoUtils
 {
 
-#if QoUtils_VECTOR
-
-template<class T, class F> constexpr
-auto map(F && f, const std::vector<T>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
+template<class T, class F, class A> constexpr
+auto map(F && f, const std::vector<T, A>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 {    
     std::vector<decltype(f(std::declval<T>()))> result(v.size());
     const std::size_t size = v.size();
@@ -63,8 +61,8 @@ auto map(F && f, const std::vector<T>& v) noexcept(std::is_nothrow_invocable_v<F
     return result;
 }
 
-template <class T, class F> constexpr
-auto& map(F && f, std::vector<T>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
+template <class T, class F, class A> constexpr
+auto& map(F && f, std::vector<T, A>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 {
     constexpr bool void_return = std::is_void_v<decltype(f(std::declval<T>()))>;
 
@@ -81,8 +79,8 @@ auto& map(F && f, std::vector<T>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
     return v;
 }
 
-template <class T, class F> constexpr
-auto map(F && f, std::vector<T>&& v) noexcept(std::is_nothrow_invocable_v<F, T>)
+template <class T, class F, class A> constexpr
+auto map(F && f, std::vector<T, A>&& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 {
     std::vector<decltype(f(std::declval<T>()))> result(v.size());
     const std::size_t size = v.size();
@@ -95,12 +93,7 @@ auto map(F && f, std::vector<T>&& v) noexcept(std::is_nothrow_invocable_v<F, T>)
     return result;
 }
 
-#endif
-
-#if QoUtils_TUPLE
-
-namespace detail::tuple
-{
+namespace detail::tuple {
 
 template<std::size_t ...I, class F, class T> constexpr
 auto map_impl(F && f, T && t, std::integer_sequence<std::size_t, I...>)
@@ -120,7 +113,7 @@ auto map_impl(F && f, T && t, std::integer_sequence<std::size_t, I...>)
     return std::tuple_cat( d(std::get<I>(std::forward<T>(t))) ... );
 }
 
-}
+} //namespace detail::tuple
 
 template<class F, class ...A> constexpr
 auto map(F && f, const std::tuple<A...>& t)
@@ -143,7 +136,6 @@ auto map(F && f, std::tuple<A...>&& t)
                                    std::make_index_sequence<sizeof... (A)>{});
 }
 
-#endif
+} // namespace QoUtils
 
-}
 #endif // QoUtils_MAP_HPP
