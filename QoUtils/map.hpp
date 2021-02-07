@@ -47,6 +47,19 @@ Examples:
 namespace QoUtils
 {
 
+template<class T, class F, std::size_t N>
+auto map(F && f, const std::array<T,N>& a) noexcept(std::is_nothrow_invocable_v<F, T>)
+{
+    std::array<decltype(f(a[0])), N> result;
+
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        result[i] = f(a[i]);
+    }
+
+    return result;
+}
+
 template<class T, class F, class A> constexpr
 auto map(F && f, const std::vector<T, A>& v) noexcept(std::is_nothrow_invocable_v<F, T>)
 {    
@@ -134,6 +147,47 @@ auto map(F && f, std::tuple<A...>&& t)
 {
     return detail::tuple::map_impl(std::forward<F>(f), std::move(t),
                                    std::make_index_sequence<sizeof... (A)>{});
+}
+
+template<class F, class T, class A>
+auto map(F && f, std::deque<T, A> const& d)
+{
+    const std::size_t size = d.size();
+    std::deque<decltype(f(std::declval<T>()))> result(size);
+
+    for (std::size_t i = 0; i < size; ++i)
+    {
+        result[i] = f(d[i]);
+    }
+
+    return result;
+}
+
+template<class F, class T, class A>
+auto map(F && f, std::forward_list<T, A> const& fl)
+{
+    std::forward_list<decltype(f(fl.front())), A> result;
+
+    for (auto it = fl.begin(), end = fl.end(); it != end; ++it)
+    {
+        result.push_front(f(*it));
+    }
+
+    result.reverse();
+    return result;
+}
+
+template<class F, class T, class A>
+auto map(F && f, std::list<T, A> const& l)
+{
+    std::list<decltype(f(l.front())), A> result;
+
+    for (auto it = l.rbegin(), end = l.rend(); it != end; ++it)
+    {
+        result.push_front(f(*it));
+    }
+
+    return result;
 }
 
 } // namespace QoUtils

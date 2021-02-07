@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 #include <tuple>
+#include <array>
+#include <deque>
+#include <forward_list>
 
 #include "map.hpp"
 
@@ -19,6 +22,46 @@ const auto throwIf42         = [](auto && a) { {if (a==42)   throw 42;} return a
 const auto throwIf42ElseNull = [](auto && a) { {if (a==42)   throw 42;} return a = 0; };
 const auto throwIf42ElseMove = [](auto && a) { {if (a=="42") throw 42;} auto b = std::move(a);
                                                                         return b; };
+BOOST_AUTO_TEST_CASE(array_clvalue)
+{
+    using namespace QoUtils;
+    const auto v = std::array {1, 20, 36, -4, 5, 0};
+
+    BOOST_CHECK(map(plus1 , v) == (std::array {1+1, 20+1, 36+1, -4+1, 5+1, 0+1}));
+    BOOST_CHECK(map(minus3, v) == (std::array {1-3, 20-3, 36-3, -4-3, 5-3, 0-3}));
+    BOOST_CHECK(map(mul5  , v) == (std::array {1*5, 20*5, 36*5, -4*5, 5*5, 0*5}));
+}  
+
+BOOST_AUTO_TEST_CASE(deque_clvalue)
+{
+    using namespace QoUtils;
+    const std::deque<int> v {1, 20, 36, -4, 5, 0};
+
+    BOOST_CHECK(map(plus1 , v) == (std::deque<int> {1+1, 20+1, 36+1, -4+1, 5+1, 0+1}));
+    BOOST_CHECK(map(minus3, v) == (std::deque<int> {1-3, 20-3, 36-3, -4-3, 5-3, 0-3}));
+    BOOST_CHECK(map(mul5  , v) == (std::deque<int> {1*5, 20*5, 36*5, -4*5, 5*5, 0*5}));
+}
+
+BOOST_AUTO_TEST_CASE(forward_list_clvalue)
+{
+    using namespace QoUtils;
+    const std::forward_list<int> v {1, 20, 36, -4, 5, 0};
+
+    BOOST_CHECK(map(plus1 , v) == (std::forward_list<int> {1+1, 20+1, 36+1, -4+1, 5+1, 0+1}));
+    BOOST_CHECK(map(minus3, v) == (std::forward_list<int> {1-3, 20-3, 36-3, -4-3, 5-3, 0-3}));
+    BOOST_CHECK(map(mul5  , v) == (std::forward_list<int> {1*5, 20*5, 36*5, -4*5, 5*5, 0*5}));
+}
+
+BOOST_AUTO_TEST_CASE(list_clvalue)
+{
+    using namespace QoUtils;
+    const std::list<int> v {1, 20, 36, -4, 5, 0};
+
+    BOOST_CHECK(map(plus1 , v) == (std::list<int> {1+1, 20+1, 36+1, -4+1, 5+1, 0+1}));
+    BOOST_CHECK(map(minus3, v) == (std::list<int> {1-3, 20-3, 36-3, -4-3, 5-3, 0-3}));
+    BOOST_CHECK(map(mul5  , v) == (std::list<int> {1*5, 20*5, 36*5, -4*5, 5*5, 0*5}));
+}
+
 BOOST_AUTO_TEST_CASE(vector_clvalue)
 {
     using namespace QoUtils;
@@ -126,7 +169,6 @@ BOOST_AUTO_TEST_CASE(tuple_clvalue)
 BOOST_AUTO_TEST_CASE(tuple_lvalue)
 {
     using namespace QoUtils;
-    using std::operator ""s;
 
     std::tuple t = {1,2,3};
 
