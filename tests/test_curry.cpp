@@ -6,7 +6,7 @@ BOOST_AUTO_TEST_SUITE(test_curry);
 
 unsigned f(int x, double y, unsigned z) { return (unsigned)(2*x + y/3 + z/1.2); }
 
-BOOST_AUTO_TEST_CASE(curry_f_value)
+BOOST_AUTO_TEST_CASE(f_values)
 {
     using namespace QoUtils;
     const auto f_c = curry(f);
