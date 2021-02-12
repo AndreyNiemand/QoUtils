@@ -11,6 +11,8 @@ namespace std
 
     template<typename, typename> class forward_list;
     template<typename, typename> class list;
+
+    template<typename> class optional;
 }
 
 #endif
