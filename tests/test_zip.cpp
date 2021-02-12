@@ -48,6 +48,18 @@ BOOST_AUTO_TEST_CASE(iterators_general_operations)
         BOOST_CHECK(a1 == (std::array{3, 2, 0}));
         BOOST_CHECK(a2 == (std::array{4,-1,-5}));
     }
+
+    {
+        const auto t1 = a1;
+        const auto t2 = a2;
+        for (auto& [x,y] : zip(a1, a2))
+        {
+            std::swap(x,y);
+        }
+
+        BOOST_CHECK(a1 == t2);
+        BOOST_CHECK(a2 == t1);
+    }
 }  
 
 BOOST_AUTO_TEST_SUITE_END();

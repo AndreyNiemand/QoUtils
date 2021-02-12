@@ -16,7 +16,6 @@ Examples:
 
 #include "STL_forward_declaration.hpp"
 #include "map.hpp"
-#include <array>
 
 namespace QoUtils
 {
