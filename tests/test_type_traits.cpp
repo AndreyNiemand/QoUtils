@@ -7,8 +7,6 @@
 #include <variant>
 #include "type_traits.hpp"
 
-#include "tuple_iterator.hpp"
-
 BOOST_AUTO_TEST_SUITE(test_type_traits);
 
 #define CREATE_OBJECT_AND_REFERENCES(container, ...)      \

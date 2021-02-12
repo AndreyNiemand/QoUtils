@@ -2,25 +2,25 @@
 #define TYPE_TRAITS_HPP
 
 #include <type_traits>
-#include "def_guard.hpp"
+#include "STL_forward_declaration.hpp"
 
-#if QoUtils_OPTIONAL
+//#if QoUtils_OPTIONAL
 template<class T> struct is_optional                   : std::false_type { };
 template<class T> struct is_optional<std::optional<T>> : std::true_type  { };
 template<class T> constexpr bool is_optional_v = is_optional<T>::value;
-#endif
+//#endif
 
-#if QoUtils_VECTOR
-template<class T> struct is_vector                 : std::false_type { };
-template<class T> struct is_vector<std::vector<T>> : std::true_type  { };
+//#if QoUtils_VECTOR
+template<class T> struct is_vector                             : std::false_type { };
+template<class T, class A> struct is_vector<std::vector<T, A>> : std::true_type  { };
 template<class T> constexpr bool is_vector_v = is_vector<T>::value;
-#endif
+//#endif
 
-#if QoUtils_TUPLE
+//#if QoUtils_TUPLE
 template<class ...T> struct is_tuple                   : std::false_type { };
 template<class ...T> struct is_tuple<std::tuple<T...>> : std::true_type  { };
 template<class ...T> constexpr bool is_tuple_v = is_tuple<T...>::value;
-#endif
+//#endif
 
 
 template<std::size_t I, class X, class ...XS>
