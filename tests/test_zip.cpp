@@ -31,14 +31,6 @@ BOOST_AUTO_TEST_CASE(iterators_general_operations)
     }
 
     {
-        int sum = 0;
-        for (auto [x, y] : zip(a1, a2))
-        {
-            sum += (x - y);
-        }
-        BOOST_CHECK_EQUAL(sum, (1-2) + (20-(-3)) + (36-43));
-    }
-    {
         auto iter = z.begin();
         BOOST_CHECK(    iter    == z.begin());
         *  iter = std::tuple{ 3, 4 };
@@ -48,7 +40,29 @@ BOOST_AUTO_TEST_CASE(iterators_general_operations)
         BOOST_CHECK(a1 == (std::array{3, 2, 0}));
         BOOST_CHECK(a2 == (std::array{4,-1,-5}));
     }
+}  
 
+BOOST_AUTO_TEST_CASE(array_clvalue)
+{
+    using namespace QoUtils;
+    auto a1 = std::array {1, 20, 36};
+    auto a2 = std::array {2, -3, 43};
+
+    {
+        int sum = 0;
+        for (auto [x, y] : zip(a1, a2))
+        {
+            sum += (x - y);
+        }
+        BOOST_CHECK_EQUAL(sum, (1-2) + (20-(-3)) + (36-43));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(array_lvalue)
+{
+    using namespace QoUtils;
+    auto a1 = std::array {1, 20, 36};
+    auto a2 = std::array {2, -3, 43};
     {
         const auto t1 = a1;
         const auto t2 = a2;
@@ -60,6 +74,6 @@ BOOST_AUTO_TEST_CASE(iterators_general_operations)
         BOOST_CHECK(a1 == t2);
         BOOST_CHECK(a2 == t1);
     }
-}  
+}
 
 BOOST_AUTO_TEST_SUITE_END();
