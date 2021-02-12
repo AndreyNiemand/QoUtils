@@ -68,14 +68,17 @@ namespace QoUtils
             bool operator!=(const_iterator const& it) const { return iterator::operator!=(it); };
         };
 
-        auto begin() const
+        auto begin()
         {
             return iterator(map([](auto && slice){ return slice.first; }, m_slices));
         }
-        auto end() const
+        auto end()
         {
             return iterator(map([](auto && slice){ return slice.second; }, m_slices));
         }
+        
+        auto begin() const { return cbegin(); }
+        auto end() const { return cend(); }
 
         auto cbegin() const
         {
@@ -85,6 +88,7 @@ namespace QoUtils
         {
             return const_iterator(map([](auto && slice){ return slice.second; }, m_slices));
         }
+        
     };
 
     template<class T>
