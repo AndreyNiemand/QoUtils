@@ -10,7 +10,7 @@ find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 file(GLOB QoUtil_FILES "../QoUtils/*.hpp")
 file(GLOB TESTS_FILES "*.cpp" module.hpp)
  
-add_executable(${PROJECT_NAME} main.cpp ${TESTS_FILES} ${QoUtil_FILES})
+add_executable(${PROJECT_NAME} ${TESTS_FILES} ${QoUtil_FILES})
  
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
